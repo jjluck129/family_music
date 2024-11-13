@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  music_server:
+    build:
+      context: ./music_server
+    ports:
+      - "9090:8081"  # 映射 9090 端口给后端服务
+    environment:
+      - DATABASE_URL=mysql://user:password@host.docker.internal:3306/database
+    depends_on:
+      - db
+
+  music_client:
+    build:
+      context: ./music-client
+    ports:
+      - "8080:3000"  # 映射 8080 端口给前端服务
+    depends_on:
+      - music_server
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: as_music
+      MYSQL_USER: xjj
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
