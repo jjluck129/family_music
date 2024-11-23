@@ -207,9 +207,9 @@ export default {
   methods: {
     // 获取歌手列表
     fetchSingers() {
-      axios.get('/singers').then(response => {
-        console.log(response.data);
-        this.singers = response.data;
+      this.$request.get('/singers').then(res => {
+        console.log(res);
+        this.singers = res;
       }).catch(error => {
         console.error('获取歌手失败', error);
       });

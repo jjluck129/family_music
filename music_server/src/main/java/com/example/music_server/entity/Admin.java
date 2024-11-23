@@ -2,7 +2,7 @@ package com.example.music_server.entity;
 
 public class Admin {
     private Integer id;
-    private String name;
+    private String username;
     private String password;
 
     public Integer getId() {
@@ -13,12 +13,12 @@ public class Admin {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String username) {
-        this.name = username;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

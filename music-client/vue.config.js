@@ -5,13 +5,7 @@ module.exports = defineConfig({
 
 module.exports = {
   devServer:{
-    proxy :{
-      '/api':{
-        target:'http://localhost:9090',
-        changeOrigin:true,
-        pathRewrite:{'^/api':''}
-      }
-    }, 
+    port: 8080,
     client: {
       overlay: {
         warnings: false, // 不显示警告

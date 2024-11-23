@@ -17,7 +17,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  // import axios from 'axios';
   
   export default {
     name: 'SingerList',
@@ -31,8 +31,11 @@
     },
     methods: {
       loadAllSingers(){
-        axios.get(`/singers`).then(response => {
-          this.singers = response.data;
+        this.$request.get(`/singers`).then(response => {
+          console.log("获取的歌手");
+          console.log(response);
+
+          this.singers = response;
         })
       },
       goToSingerDetail(id) {

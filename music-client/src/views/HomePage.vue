@@ -11,9 +11,23 @@
             <input type="text" class="search-box" placeholder="搜索音乐、歌手..." />
         </div>
         <div class="front-header-right">
+          <div v-if="user.username" class="user-menu">
+            <span
+              class="username"
+              @click="toggleDropdown"
+            >
+              {{ user.username }}
+              <i class="fas fa-caret-down"></i>
+            </span>
+            <div v-if="isDropdownVisible" class="dropdown-menu">
+              <button @click="logout" class="dropdown-item">退出</button>
+            </div>
+          </div>
+          <div v-else>
             <router-link to="/homepage/userregister" class="auth-link">注册</router-link>
             <span class="separator">|</span>
-            <router-link to="/homepage/userlogin" href="#" class="auth-link">登录</router-link>
+            <router-link to="/homepage/userlogin" class="auth-link">登录</router-link>
+          </div>
         </div>
     </div>
     <!-- 侧边栏 -->
@@ -105,26 +119,57 @@ import PlayList from './Front/PlayList.vue';
 export default {
   data() {
     return {
+      user:{},
       activeMenu: 'discover', // 默认选中“发现音乐”
       isSidebarOpen: false,    // 侧边栏初始状态为打开
+      isDropdownVisible:false,
     };
   },
   mounted() {
+    const savedUser = JSON.parse(localStorage.getItem("family-user") || "{}");
+    if (savedUser && savedUser.username) {
+      this.user = savedUser; // 同步到组件的 user 数据
+    }
     // 监听点击事件
     document.addEventListener('click', this.handleClickOutside);
   },
+  beforeMount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  },
   methods: {
+    toggleDropdown(){
+      this.isDropdownVisible = !this.isDropdownVisible;
+    },
     handleClickOutside(event) {
-      // 如果点击事件发生在侧边栏外部且侧边栏是打开的状态
-      if (this.isSidebarOpen && !this.$refs.sidebar.contains(event.target)) {
-        this.isSidebarOpen = false; // 关闭侧边栏
-        }
-      },
+      const dropdown = this.$el.querySelector(".dropdown-menu");
+      const username = this.$el.querySelector(".username");
+      const sidebar = this.$refs.sidebar;
+      if (
+        this.isDropdownVisible && // 下拉菜单打开时
+        ((!dropdown || !dropdown.contains(event.target)) && // 如果 dropdown 存在且点击不在其内
+        (!username || !username.contains(event.target))) // 如果 username 存在且点击不在其内
+      ) {
+        this.isDropdownVisible = false;
+      }
+      if ( this.isSidebarOpen &&  (!sidebar || !sidebar.contains(event.target)) // 如果点击不在侧边栏内部
+      ) {
+        this.isSidebarOpen = false;
+      }
+    },
     setActive(menuItem) {
       this.activeMenu = menuItem; // 设置为当前点击的菜单项
     },
     toggleSidebar() {
+      console.log('这是切换按钮');
+      console.log(this.user);
+      console.log(this.user.username);
       this.isSidebarOpen = !this.isSidebarOpen; // 切换侧边栏的显示状态
+    },
+    logout(){
+      localStorage.removeItem("family-user");
+      this.user = {};
+      this.isDropdownVisible = false;
+      this.$router.push("/homepage/discovermusic")
     },
   },
   components:{
@@ -201,6 +246,44 @@ export default {
   color: #ffffff;
   margin: 0 5px;
 }
+.username {
+  font-weight: bold;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.username i {
+  margin-left: 5px;
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: #333;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  display: block;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  width: 100%;
+}
+.dropdown-item:hover {
+  background: #444;
+}
+
 
 /* 侧边栏容器样式 */
 .sidebar-container {

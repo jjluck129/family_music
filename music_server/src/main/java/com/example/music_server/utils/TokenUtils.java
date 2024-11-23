@@ -4,7 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.music_server.entity.Admin;
 import com.example.music_server.entity.User;
+import com.example.music_server.mapper.AdminMapper;
 import com.example.music_server.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -19,13 +21,22 @@ import java.util.Date;
 public class TokenUtils {
 
     private static UserMapper staticUserMapper;
+    private static AdminMapper staticAdminMapper;
 
     @Resource
     UserMapper userMapper;
 
+    @Resource
+    AdminMapper adminMapper;
+
     @PostConstruct
     public void setUserService(){
         staticUserMapper = userMapper;
+    }
+
+    @PostConstruct
+    public void setAdminService(){
+        staticAdminMapper = adminMapper;
     }
 
     /**
@@ -47,6 +58,20 @@ public class TokenUtils {
             if (StrUtil.isNotEmpty(token)) {
                 String userId = JWT.decode(token).getAudience().get(0);
                 return staticUserMapper.findById(Integer.valueOf(userId));
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
+    }
+
+    public static Admin getCurrentAdmin() {
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            String token = request.getHeader("token");
+            if (StrUtil.isNotEmpty(token)) {
+                String userId = JWT.decode(token).getAudience().get(0);
+                return staticAdminMapper.findById(Integer.valueOf(userId));
             }
         } catch (Exception e) {
             return null;

@@ -15,7 +15,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+// import axios from 'axios';
   export default {
     name: 'UserLogin',
     data() {
@@ -31,16 +31,22 @@
       };
     },
     methods: {
-      async handleLogin() {
+      handleLogin() {
         this.$refs.loginForm.validate(async (valid) => {
+          console.log(this.loginForm)
           if (valid) {
             try {
-              const response = await axios.post('/users/login', this.loginForm);
-              localStorage.setItem('token', response.token); // 存储 Token
-              this.$message.success('登录成功！');
-              this.$router.push({ path: '/' }); // 登录成功后跳转到主页
+              const response = await this.$request.post('/users/login', this.loginForm);
+              console.log(response);
+              if (response.code === '200') {
+              localStorage.setItem('family-user', JSON.stringify(response.data));
+              this.$message.success('登录成功')
+              this.$router.push("/homepage/discovermusic")
+              } else {
+                this.$message.error(response.data.msg);
+              }
             } catch (error) {
-              this.$message.error(error || '登录失败');
+              this.$message.error('登录失败，请重试');
             }
           }
         });

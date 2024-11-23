@@ -1,8 +1,10 @@
 package com.example.music_server.service.impl;
 
 import com.example.music_server.entity.User;
+import com.example.music_server.exception.ServiceException;
 import com.example.music_server.mapper.UserMapper;
 import com.example.music_server.service.UserService;
+import com.example.music_server.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,4 +65,18 @@ public class UserServiceImpl implements UserService {
         return userMapper.findByUsername(username);
     }
 
+
+    @Override
+    public User login(User user) {
+        // 根据用户名查询用户信息
+        User dbUser = userMapper.findByUsername(user.getUsername());
+        if (dbUser == null || !user.getPassword().equals(dbUser.getPassword())) {
+            throw new ServiceException("用户名或密码错误");
+        }
+
+        // 登录成功，生成 token
+        String token = TokenUtils.createToken(String.valueOf(dbUser.getId()), dbUser.getPassword());
+        dbUser.setToken(token);
+        return dbUser;
+    }
 }

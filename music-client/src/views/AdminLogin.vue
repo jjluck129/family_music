@@ -54,20 +54,16 @@ export default {
     // 处理登录
     handleLogin() {
       // 发送登录请求
-      const name = this.loginForm.username;
       console.log(this.loginForm)
       axios.post('/admin/login', this.loginForm)
         .then((response) => {
-          // const { data } = response;
-          console.log(response)
-          // 检查返回数据中的成功状态
-          console.log(response.data);
-          if (response.status == 200) {
+          if (response.status === 200 && response.data.token) {
+            const token = response.data.token;
+            // 存储 token
+            localStorage.setItem('token', token);
             this.$message.success('登录成功！');
-            this.$router.push({
-              path:'/',
-              query: { name },
-            }); // 跳转到管理员主页
+            // 跳转到管理员主页并传递用户名
+            this.$router.push("/dashboard");
           } else {
             this.errorMessage = '用户名或密码错误';
           }

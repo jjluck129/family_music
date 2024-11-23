@@ -69,6 +69,7 @@
     name: "HomeManager",
     data() {
       return {
+        user:JSON.parse(localStorage.getItem('family-user') || '{}'),
         username: '',
         collapse: false, // 控制侧边栏是否折叠
       };

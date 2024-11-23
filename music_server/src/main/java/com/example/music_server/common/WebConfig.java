@@ -14,6 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:8080")
                 .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS","PATCH")
                 .allowCredentials(true)
-                .allowedHeaders("*");
+                .allowedHeaders("token", "Content-Type");
+        // 添加调试信息
+        System.out.println("CORS Config applied!");
     }
 }

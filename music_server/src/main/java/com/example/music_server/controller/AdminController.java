@@ -1,5 +1,8 @@
 package com.example.music_server.controller;
 
+import com.example.music_server.common.Result;
+import com.example.music_server.entity.Admin;
+import com.example.music_server.exception.ServiceException;
 import com.example.music_server.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +19,14 @@ public class AdminController {
 
     // 登录接口
     @PostMapping("/login")
-    public ResponseEntity<String> login( @RequestBody Map<String, String> request) {
-        String name = request.get("username");
-        String password = request.get("password");
-        System.out.println(name);
-        System.out.println(password);
-        boolean isValid = adminService.validateAdminCredentials(name, password);
-        if (isValid) {
-            return ResponseEntity.ok("登录成功");
-        } else {
-            return ResponseEntity.status(401).body("用户名或密码错误");
+    public Result login(@RequestBody Admin admin) {
+        System.out.println(admin);
+        try {
+            // 调用 Service 层进行登录验证
+            String token = adminService.login(admin.getUsername(), admin.getPassword());
+            return Result.success(token);  // 返回生成的 token
+        } catch (ServiceException e) {
+            return Result.error(e.getCode(), e.getMessage());  // 返回错误信息
         }
     }
 }

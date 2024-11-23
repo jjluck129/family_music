@@ -9,13 +9,13 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.example.music_server.entity.User;
 import com.example.music_server.exception.ServiceException;
 import com.example.music_server.mapper.UserMapper;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import sun.security.x509.AuthorityInfoAccessExtension;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+
 
 public class JwtInterceptor  implements HandlerInterceptor {
 
@@ -25,6 +25,7 @@ public class JwtInterceptor  implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
         String token = request.getHeader("token");
+        System.out.println("接受到的token为"+token);
         if(StrUtil.isBlank(token)){
             token = request.getParameter("token");
         }
@@ -37,20 +38,24 @@ public class JwtInterceptor  implements HandlerInterceptor {
 //        }
         //执行认证
         if(StrUtil.isBlank(token)){
-            throw new ServiceException("401","请登录");
+            throw new ServiceException("401","请登录，并且提供有效的token");
         }
         // 获取 token 中的 userid
         String userId;
         try {
             userId = JWT.decode(token).getAudience().get(0);
         } catch (JWTDecodeException j){
-            throw new ServiceException("401","请登录");
+            throw new ServiceException("401","请登录，无效的token格式");
         }
 
         //根据token中的userid查询数据库
         User user = userMapper.findById(Integer.valueOf(userId));
         if(user == null){
-            throw new ServiceException("401","请登录");
+            throw new ServiceException("401","请登录，用户名不存再或者已删除");
+        }
+        // 验证 token 是否过期
+        if (JWT.decode(token).getExpiresAt().before(new Date())) {
+            throw new ServiceException("401", "token 已过期");
         }
         // 通过用户名密码加密生成一个验证器 token
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();

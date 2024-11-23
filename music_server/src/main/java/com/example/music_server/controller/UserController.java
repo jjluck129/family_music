@@ -1,10 +1,10 @@
 package com.example.music_server.controller;
 
+import com.example.music_server.common.Result;
 import com.example.music_server.entity.User;
+import com.example.music_server.exception.ServiceException;
 import com.example.music_server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -79,24 +79,16 @@ public class UserController {
     /**
      * 用户登录
      */
-//    @PostMapping("/login")
-//    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
-//        String username = loginData.get("username");
-//        String password = loginData.get("password");
-//
-//        User user = userService.findByUsername(username);
-//
-//        // 验证用户名和密码
-//        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户名或密码错误");
-//        }
-//
-//        // 生成 JWT Token
-//        String token = jwtUtil.generateToken(username);
-//
-//        // 返回 token
-//        Map<String, String> response = new HashMap<>();
-//        response.put("token", token);
-//        return ResponseEntity.ok(response);
-//    }
+    @PostMapping("/login")
+    public Result login(@RequestBody User user) {
+        try {
+            User loggedInUser = userService.login(user);
+            return Result.success(loggedInUser); // 登录成功返回数据
+        } catch (ServiceException e) {
+            return Result.error(e.getCode(), e.getMessage()); // 捕获自定义异常返回错误信息
+        } catch (Exception e) {
+            return Result.error("500", "系统异常，请稍后再试"); // 捕获其他未知异常
+        }
+    }
+
 }

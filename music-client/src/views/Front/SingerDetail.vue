@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+// import axios from 'axios';
 
 export default {
   name: 'SingerDetail',
@@ -90,11 +90,11 @@ export default {
   },
   methods: {
     loadSingerDetail(id) {
-      axios.get(`/singers/${id}`).then((response) => {
-        this.singer = response.data;
+      this.$request.get(`/singers/${id}`).then((response) => {
+        this.singer = response;
       });
-      axios.get(`/songs/list/${id}`).then((response) => {
-        this.songs = response.data;
+      this.$request.get(`/songs/list/${id}`).then((response) => {
+        this.songs = response;
       });
     },
     playSong(song) {

@@ -14,6 +14,8 @@ public interface UserService {
     void deleteUsers(List<Integer> ids);
 
     boolean existsByUsername(String username);
-
+    // 用户登录验证
+    User login(User user);
     User findByUsername(String username);
+
 }

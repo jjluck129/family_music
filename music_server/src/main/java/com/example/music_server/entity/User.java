@@ -16,6 +16,7 @@ public class User {
     private Date createTime;
     private Date updateTime;
 
+    private String token;
     public Integer getId() {
         return id;
     }
@@ -110,6 +111,14 @@ public class User {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override

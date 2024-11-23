@@ -1,22 +1,33 @@
 package com.example.music_server.common;
 
-import lombok.Builder;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.annotation.Resource;
 
 @Configuration
-public class InterceptorConfig extends WebMvcConfigurationSupport {
+public class InterceptorConfig implements WebMvcConfigurer {
+
+    @Resource
+    private JwtInterceptor jwtInterceptor;
 
     @Override
-    protected void addInterceptors(InterceptorRegistry registry){
-        registry.addInterceptor(jwtInterceptor())
-                .addPathPatterns("/**") //拦截所有的请求路径
+    public void addInterceptors(InterceptorRegistry registry){
+        registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
+                .addPathPatterns("/") //拦截所有的请求路径
                 .excludePathPatterns("/users/login")
+                .excludePathPatterns("/admin/login")
                 .excludePathPatterns("/singers")
-                .excludePathPatterns("/songs");
-        super.addInterceptors(registry);
+                .excludePathPatterns("/singers/**")
+                .excludePathPatterns("/songs")
+                .excludePathPatterns("/songs/**")
+                .excludePathPatterns("//img/**")
+                .excludePathPatterns("//song/**");
+
     }
 
     @Bean
