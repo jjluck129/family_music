@@ -149,7 +149,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default {
   data() {
     return {
@@ -208,9 +207,15 @@ export default {
     // 获取歌手列表
     fetchSingers() {
       this.$request.get('/singers').then(res => {
-        console.log(res);
-        this.singers = res;
+        if(res.code === '200'){
+          console.log(res);
+          this.singers = res.data;
+        }else{
+          this.$message.error(res.msg || '获取歌手失败');
+        }
+        
       }).catch(error => {
+        this.$message.error('获取歌手失败');
         console.error('获取歌手失败', error);
       });
     },
@@ -220,19 +225,22 @@ export default {
     },
     // 添加歌手
     submitNewSinger() {
-      axios.post('/singers', this.newSinger).then(() => {
-        this.$message.success('添加成功');
-        this.addSingerDialogVisible = false;
-        this.fetchSingers();
-        this.newSinger = {
-          name: '',
-          gender: '',
-          imgUrl: '',
-          birth: '',
-          location: '',
-          description: ''
-        };
-        // this.$refs.singerImgUpload.clearFiles();
+      this.$request.post('/singers', this.newSinger).then(res => {
+        if(res.code === '200'){
+          this.$message.success('添加成功');
+          this.addSingerDialogVisible = false;
+          this.fetchSingers();
+          this.newSinger = {
+            name: '',
+            gender: '',
+            imgUrl: '',
+            birth: '',
+            location: '',
+            description: ''
+          };
+        }else{
+          this.$message.error(res.msg || '添加失败');
+        }
       }).catch(error => {
         this.$message.error('添加失败');
         console.error('添加歌手失败', error);
@@ -271,10 +279,15 @@ export default {
     },
     submitNewPic(){
       console.log(this.diaId);
-      axios.patch(`/singers/${this.diaId}`,this.picSinger).then(() => {
-        this.$message.success('更新成功');
-        this.changePicDialogVisible = false;
-        this.fetchSingers();
+      this.$request.patch(`/singers/${this.diaId}`,this.picSinger).then(res => {
+        if(res.code === '200'){
+          this.$message.success('更新成功');
+          this.changePicDialogVisible = false;
+          this.fetchSingers();
+        }else{
+          this.$message.error(res.msg || '更新失败');
+        }
+        
       }).catch(() => {
         this.$message.error('更新失败');
       });
@@ -286,10 +299,14 @@ export default {
       this.editSingerDialogVisible = true;
     },
     submitEditSinger() {
-      axios.put(`/singers/${this.currentSinger.id}`, this.currentSinger).then(() => {
-        this.$message.success('编辑成功');
-        this.editSingerDialogVisible = false;
-        this.fetchSingers();
+      this.$request.put(`/singers/${this.currentSinger.id}`, this.currentSinger).then(res  => {
+        if(res.code === '200'){
+          this.$message.success('编辑成功');
+          this.editSingerDialogVisible = false;
+          this.fetchSingers();
+        }else {
+          this.$message.error(res.msg || '编辑失败');
+        }
       }).catch(error => {
         this.$message.error('编辑失败');
         console.error('编辑歌手失败', error);
@@ -301,9 +318,14 @@ export default {
       this.$confirm(`确定要删除歌手 ${singer.name} 吗？`, '警告', {
         type: 'warning'
       }).then(() => {
-        axios.delete(`/singers/${singer.id}`).then(() => {
-          this.$message.success('删除成功');
-          this.fetchSingers();
+        this.$request.delete(`/singers/${singer.id}`).then(res => {
+          if(res.code === '200'){
+            this.$message.success('删除成功');
+            this.fetchSingers();
+          }else{
+            this.$message.error(res.msg || '删除失败');
+          }
+          
         }).catch(error => {
           this.$message.error('删除失败');
           console.error('删除歌手失败', error);
@@ -329,10 +351,14 @@ export default {
       })
         .then(() => {
           // 调用批量删除的 API
-          axios.delete(`/singers`, { data: { ids } }) // 发送 DELETE 请求
-            .then(() => {
-              this.$message.success('批量删除成功');
-              this.fetchSingers(); // 刷新歌手列表
+          this.$request.delete(`/singers`, { data: { ids } }) // 发送 DELETE 请求
+            .then(res => {
+              if(res.code === '200'){
+                this.$message.success('批量删除成功');
+                this.fetchSingers(); // 刷新歌手列表
+              }else {
+                this.$message.error(res.msg || '批量删除失败');
+              }
             })
             .catch(error => {
               this.$message.error('批量删除失败');

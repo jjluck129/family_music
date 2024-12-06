@@ -6,8 +6,10 @@ import com.example.music_server.exception.ServiceException;
 import com.example.music_server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,13 +17,16 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
 
 
     @GetMapping
-    public List<User> getAlluser(){
-        return userService.getAlluser();
+    public Result getAlluser(){
+        List<User> list = userService.getAlluser();
+        return Result.success(list);
     }
 
     @PostMapping("/add")
@@ -39,11 +44,26 @@ public class UserController {
     }
 
     @PutMapping("/updateAvatar/{id}")
-    public String updateAvatar(@PathVariable Integer id, @RequestBody Map<String, String> request) {
-        String avatar = request.get("avatar");
-        System.out.println(avatar);
-        userService.updateAvatar(id, avatar);
-        return "头像更新成功";
+    public Result updateAvatar(@PathVariable Integer id,  @RequestHeader("token") String token,@RequestBody Map<String, String> request) {
+//        logger.info("进入更新头像方法，处理用户ID为 {} 的头像更新请求", id);
+//        String avatar = request.get("avatar");
+//        System.out.println(avatar);
+//        userService.updateAvatar(id, avatar);
+        try {
+            String avatar = request.get("avatar");
+            logger.info("从请求体中获取到的头像信息: {}", avatar);
+
+            // 调用服务层方法更新头像
+            userService.updateAvatar(id, avatar);
+
+            logger.info("头像更新成功");
+            return Result.success();
+        } catch (Exception e) {
+            logger.error("头像更新过程中出现错误: {}", e.getMessage());
+            // 返回一个包含错误信息的响应给前端，状态码设置为500，表示服务器内部错误
+            return Result.error() ;
+        }
+//        return Result.success();
     }
 
     @DeleteMapping("/delete/{id}")

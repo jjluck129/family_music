@@ -111,8 +111,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   data() {
     return {
@@ -138,6 +136,10 @@ export default {
  
   computed: {
     filteredData() {
+      console.log(this.playlists)
+      if (!Array.isArray(this.playlists)) {
+        return []; // 如果 playlists 不是数组，返回空数组
+      }
       if (this.searchWord) {
         return this.playlists.filter((item) => {
           return (
@@ -155,20 +157,23 @@ export default {
   },
   methods: {
     loadPlaylistData(){
-      axios.get('/playlist').then(response =>{
+      this.$request.get('/playlist').then(response =>{
+        console.log(response);
         this.playlists = response.data;
-        console.log(this.playlists)
       }).catch(error =>{
         console.error("获取歌单失败",error);
+        this.$message.error('无法加载歌单数据，请稍后再试');
       })
     },
     // 添加歌单
     addSongList() {
-      axios.post('/playlist/add', this.registerForm).then(() => {
+      this.$request.post('/playlist/add', this.registerForm).then(() => {
+        this.$message.success('歌单添加成功');
         this.loadPlaylistData();
         this.centerDialogVisible = false;
       }).catch(error => {
         console.error('添加歌单失败', error);
+        this.$message.error('添加歌单失败，请检查输入数据');
       });
     },
     // 编辑歌单
@@ -177,30 +182,66 @@ export default {
       this.editVisible = true;
     },
     saveEdit() {
-      axios.put('/playlist/update', this.editForm).then(() => {
+      this.$request.put('/playlist/update', this.editForm).then(() => {
+        this.$message.success('歌单更新成功');
         this.loadPlaylistData();
         this.editVisible = false;
       }).catch(error => {
         console.error('更新歌单失败', error);
+        this.$message.error('更新歌单失败，请稍后再试');
       });
     },
     // 删除单行
     deleteRow(id) {
-      axios.delete(`/playlist/delete/${id}`).then(() => {
-        this.loadPlaylistData();
-      }).catch(error => {
-        console.error('删除歌单失败', error);
+      this.$confirm('此操作将永久删除该歌单, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$request
+          .delete(`/playlist/delete/${id}`)
+          .then(() => {
+            this.$message.success('歌单删除成功');
+            this.loadPlaylistData();
+          })
+          .catch((error) => {
+            console.error('删除歌单失败', error);
+            this.$message.error('删除歌单失败，请稍后再试');
+          });
       });
     },
 
     // 批量删除
     deleteAll() {
-      const ids = this.multipleSelection.map(item => item.id);
-      axios.delete(`/playlist/deleteBatch`, { data: ids }).then(() => {
-        this.loadPlaylistData();
-        this.multipleSelection = [];
-      }).catch(error => {
-        console.error('批量删除失败', error);
+      // const ids = this.multipleSelection.map(item => item.id);
+      // this.$request.delete(`/playlist/deleteBatch`, { data: ids }).then(() => {
+      //   this.loadPlaylistData();
+      //   this.multipleSelection = [];
+      // }).catch(error => {
+      //   console.error('批量删除失败', error);
+      // });
+      if (this.multipleSelection.length === 0) {
+        this.$message.warning('请至少选择一项进行删除');
+        return;
+      }
+
+      this.$confirm('此操作将永久删除所选歌单, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const ids = this.multipleSelection.map((item) => item.id);
+        this.$request
+          .delete('/playlist/deleteBatch', { data: ids })
+          .then(() => {
+            this.$message.success('批量删除成功');
+            this.loadPlaylistData();
+            this.multipleSelection = [];
+          })
+          .catch((error) => {
+            console.error('批量删除失败', error);
+            this.$message.error('批量删除失败，请稍后再试');
+          });
       });
     },
     // 处理选择变化
@@ -214,7 +255,7 @@ export default {
     // 图片更新处理
     handleImgSuccess(response, playlistId) {
       const imageUrl = response.url;
-      axios.put(`/playlist/updatePlaylistPic/${playlistId}`, { imgUrl: imageUrl })
+      this.$request.put(`/playlist/updatePlaylistPic/${playlistId}`, { imgUrl: imageUrl })
         .then(() => {
           this.$message.success('图片更新成功');
           this.loadPlaylistData();

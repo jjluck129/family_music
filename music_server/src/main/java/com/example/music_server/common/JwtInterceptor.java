@@ -9,14 +9,18 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.example.music_server.entity.User;
 import com.example.music_server.exception.ServiceException;
 import com.example.music_server.mapper.UserMapper;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
-
+@Component
 public class JwtInterceptor  implements HandlerInterceptor {
 
     @Resource
@@ -24,18 +28,34 @@ public class JwtInterceptor  implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true; // 直接放行预检请求
+        }
+//        System.out.println("所有的请求头: ");
+//        Enumeration<String> headerNamesEnumeration = request.getHeaderNames();
+//        List<String> headerNamesList = new ArrayList<>();
+//        while (headerNamesEnumeration.hasMoreElements()) {
+//            headerNamesList.add(headerNamesEnumeration.nextElement());
+//        }
+//        Iterable<String> headerNamesIterable = headerNamesList;
+//        for (String header : headerNamesIterable) {
+//            System.out.println(header + ": " + request.getHeader(header));
+//        }
+        System.out.println("所有请求头: ");
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            System.out.println(headerName + ": " + request.getHeader(headerName));
+        }
+        System.out.println("++");
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Token in request: " + request.getHeader("token"));
+
         String token = request.getHeader("token");
         System.out.println("接受到的token为"+token);
         if(StrUtil.isBlank(token)){
             token = request.getParameter("token");
         }
-//        //如果不是映射直接通过
-//        if (handler instanceof HandlerMethod){
-//            AuthAccess annotation = ((HandlerMethod) handler).getMethodAnnotation(AuthAccess.class);
-//            if (annotation != null){
-//                return true;
-//            }
-//        }
         //执行认证
         if(StrUtil.isBlank(token)){
             throw new ServiceException("401","请登录，并且提供有效的token");

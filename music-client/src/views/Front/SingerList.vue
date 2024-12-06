@@ -35,7 +35,7 @@
           console.log("获取的歌手");
           console.log(response);
 
-          this.singers = response;
+          this.singers = response.data;
         })
       },
       goToSingerDetail(id) {

@@ -6,7 +6,7 @@
           <el-button type="text" @click="toggleCollapse" class="toggle-button">
             <i :class="collapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
           </el-button>
-          <img src="#" alt="" style="width: 50px; height: 50px;">
+          <img src="@/assets/img/familymood.png" alt="" style="width: 50px; height: 50px;">
           <span class="title">Family Mood</span>
         </div>
         <div class="header-right">

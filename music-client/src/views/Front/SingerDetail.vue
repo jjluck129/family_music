@@ -42,18 +42,19 @@
               <i class="fa fa-play-circle icon-btn" @click="playSong(song)"></i>
 
               <!-- 添加按钮，使用 el-dropdown -->
-              <el-dropdown trigger="click" @command="handleAddCommand">
+              <el-dropdown  @command="handleAddCommand(song)" placement="bottom">
+                <i class="fa fa-plus-circle icon-btn"></i>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="playlist" :data-song="song">添加到歌曲列表</el-dropdown-item>
                     <el-dropdown-item command="favorites" :data-song="song">添加到收藏</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
-                <i class="fa fa-plus-circle icon-btn"></i>
+                
               </el-dropdown>
 
               <!-- 分享按钮，使用 el-dropdown -->
-              <el-dropdown trigger="click" @command="handleShareCommand">
+              <el-dropdown trigger="click" @command="handleShareCommand" placement="bottom-end">
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="share1" :data-song="song">分享选项 1</el-dropdown-item>
@@ -90,11 +91,12 @@ export default {
   },
   methods: {
     loadSingerDetail(id) {
-      this.$request.get(`/singers/${id}`).then((response) => {
-        this.singer = response;
+      this.$request.get(`/singers/${id}`).then(response => {
+        console.log("返回的数据"+response.data)
+        this.singer = response.data;
       });
       this.$request.get(`/songs/list/${id}`).then((response) => {
-        this.songs = response;
+        this.songs = response.data;
       });
     },
     playSong(song) {

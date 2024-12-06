@@ -42,7 +42,7 @@
           <el-upload :action="uploadImageUrl" :data="{ type: 'songImg' }" :show-file-list="false" :on-success="(res) => handleImageUploadSuccess(res, scope.row.id)" >
             <el-button>更新图片</el-button>
           </el-upload>
-          <el-upload :action="uploadMp3Url" :data="{ songId: scope.row.id }" :show-file-list="false" :on-change="(file) => handleFileChange(file, scope.row.id)"  :on-success="handleUploadSuccess">
+          <el-upload :action="uploadMp3Url" :data="{ songId: scope.row.id }" :show-file-list="false" :on-change="(file) => handleFileChange(file, scope.row.id)"  :on-success="handleUploadSuccess" :auto-upload="false">
             <el-button>更新歌曲</el-button>
           </el-upload>
         </template>
@@ -107,11 +107,10 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   data() {
     return {
+      user: JSON.parse(localStorage.getItem("family-user") || "{}"),
       breadcrumbList: [
         { name: '歌手管理', path: '/singerInfo' },
         { name: '歌曲信息' },
@@ -162,29 +161,45 @@ export default {
   methods: {
     // 加载表格数据
     loadTableData() {
-      axios.get(`/songs/list/${this.singerId}`).then(response => {
-        this.tableData = response.data;
+      this.$request.get(`/songs/list/${this.singerId}`).then(response => {
+        if(response.code === '200'){
+          this.tableData = response.data;
+        }else{
+          this.$message.error(response.msg || '加载失败');
+        }
       });
     },
     // 添加歌曲
     saveSong() {
-      axios.post('/songs/add', this.registerForm).then(() => {
-        this.$message.success('添加成功');
-        this.centerDialogVisible = false;
-        this.registerForm.songName = '';
-        this.registerForm.albumName = '';
-        this.registerForm.lyrics = '';
-        this.loadTableData(); // 重新加载表格数据
+      this.$request.post('/songs/add', this.registerForm).then(response  => {
+        if (response.code === '200') {
+          this.$message.success('添加成功');
+          this.centerDialogVisible = false;
+          this.registerForm.songName = '';
+          this.registerForm.albumName = '';
+          this.registerForm.lyrics = '';
+          this.loadTableData(); // 重新加载表格数据
+        }else {
+          this.$message.error(response.msg || '添加失败');
+        }
+      }).catch(error => {
+        this.$message.error('添加失败');
+        console.error(error);
       });
     },
      // 处理图片上传成功后的逻辑
      handleImageUploadSuccess(response, songId) {
       if (response.url) {
         // 上传成功后调用后端接口更新图片路径
-        axios.put(`/songs/updateSongPic/${songId}`, { picUrl: response.url })
-          .then(() => {
-            this.$message.success('图片更新成功');
-            this.loadTableData();  // 刷新表格数据
+        this.$request.put(`/songs/updateSongPic/${songId}`, { picUrl: response.url })
+          .then(res => {
+            console.log(res);
+            if (res.code === '200') {
+              this.$message.success('图片更新成功');
+              this.loadTableData();  // 刷新表格数据
+            } else {
+              this.$message.error(res.msg || '图片更新失败');
+            }
           })
           .catch(() => {
             this.$message.error('图片更新失败');
@@ -193,15 +208,24 @@ export default {
     },
     //上传MP3
     handleFileChange(file,songId) {
+      // const uploadMp3Url = 'http://localhost:9090/songs/uploadMp3';
       const mp3File = file.raw; // 确保获取原始文件对象
       const formData = new FormData();
       formData.append("mp3", mp3File);
       formData.append("songId", songId);
       // 发送请求
-      this.$axios.post(this.uploadMp3Url, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      this.$request.post('http://localhost:9090/songs/uploadMp3', formData,{
+        headers: {
+              'token': this.user.token  // 从本地存储或全局状态中获取 token
+          }
       })
-      .then(response => this.handleUploadSuccess(response.data))
+      .then(response => {
+          if (response.url) {
+              this.handleUploadSuccess(response);  // 上传成功，处理成功回调
+          } else {
+              this.$message.error('上传失败');
+          }
+        })
       .catch(error => {
         console.error("上传失败:", error);
         this.$message.error("上传失败");
@@ -223,17 +247,28 @@ export default {
       this.editDialogVisible = true;
     },
     updateSong() {
-      axios.put('/songs/update', this.editForm).then(() => {
-        this.$message.success('更新成功');
-        this.editDialogVisible = false;
-        this.loadTableData();
+      this.$request.put('/songs/update', this.editForm).then(res => {
+        if(res.code === '200'){
+          this.$message.success('更新成功');
+          this.editDialogVisible = false;
+          this.loadTableData();
+        }else {
+          this.$message.error(res.msg || '更新失败');
+        }
       });
     },
     // 删除单首歌曲
     deleteRow(id) {
-      axios.delete(`/songs/delete/${id}`).then(() => {
-        this.$message.success('删除成功');
-        this.loadTableData();
+      this.$request.delete(`/songs/delete/${id}`).then(response  => {
+        if (response.code === '200') {
+          this.$message.success('删除成功');
+          this.loadTableData();
+        } else {
+          this.$message.error(response.msg || '删除失败');
+        }
+      }).catch(error => {
+        this.$message.error('删除失败');
+        console.error(error);
       });
     },
     // 批量删除
@@ -246,10 +281,14 @@ export default {
     },
     confirmDelete() {
       const ids = this.selectedRows.map(row => row.id);
-      axios.post('/songs/deleteBatch', { ids }).then(() => {
-        this.$message.success('批量删除成功');
-        this.delVisible = false;
-        this.loadTableData();
+      this.$request.post('/songs/deleteBatch', { ids }).then(response  => {
+        if (response.code === '200') {
+          this.$message.success('批量删除成功');
+          this.delVisible = false;
+          this.loadTableData();
+        } else {
+          this.$message.error(response.msg || '批量删除失败');
+        }
       });
     },
     // 处理表格多选

@@ -52,4 +52,9 @@ public class SongServiceImpl implements SongService {
         return songMapper.updateSongMp3(id, mp3Url) > 0;
     }
 
+    @Override
+    public List<Song> searchSongs(String keyword){
+        return songMapper.searchSongs("%" + keyword + "%");
+    }
+
 }

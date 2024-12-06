@@ -1,5 +1,6 @@
 package com.example.music_server.controller;
 
+import com.example.music_server.common.Result;
 import com.example.music_server.entity.Playlist;
 import com.example.music_server.entity.Song;
 import com.example.music_server.service.PlaylistService;
@@ -25,46 +26,47 @@ public class PlaylistController {
 
     // 获取歌单列表
     @GetMapping
-    public List<Playlist> getAllPlaylist() {
-        return playlistService.getAllPlaylist();
+    public Result getAllPlaylist() {
+        List<Playlist> playlists = playlistService.getAllPlaylist();
+        return Result.success(playlists);
     }
 
     // 添加歌曲
     @PostMapping("/add")
-    public String addPlaylist(@RequestBody Playlist playlist) {
+    public Result addPlaylist(@RequestBody Playlist playlist) {
         playlistService.addPlaylist(playlist);
-        return "添加成功";
+        return Result.success("歌单添加成功");
     }
 
     // 删除歌曲
     @DeleteMapping("/delete/{id}")
-    public String deletePlaylist(@PathVariable Integer id) {
+    public Result deletePlaylist(@PathVariable Integer id) {
         playlistService.deletePlaylist(id);
-        return "删除成功";
+        return Result.success("歌单删除成功");
     }
 
     // 更新歌曲
     @PutMapping("/update")
-    public String updatePlaylist(@RequestBody Playlist playlist) {
+    public Result updatePlaylist(@RequestBody Playlist playlist) {
         playlistService.updatePlaylist(playlist);
-        return "更新成功";
+        return Result.success("歌单更新成功");
     }
 
     //更新图片
     @PutMapping("/updatePlaylistPic/{id}")
-    public ResponseEntity<String> updateSongPic(@PathVariable Integer id, @RequestBody Map<String, String> request) {
+    public Result  updatePlaylistPic(@PathVariable Integer id, @RequestBody Map<String, String> request) {
         String imgUrl = request.get("imgUrl");
 
         if (imgUrl == null || imgUrl.isEmpty()) {
-            return ResponseEntity.badRequest().body("图片 URL 不能为空");
+            return Result.error("400", "图片 URL 不能为空");
         }
 
         boolean updated = playlistService.updatePlaylistPic(id, imgUrl);
 
         if (updated) {
-            return ResponseEntity.ok("图片 URL 更新成功");
+            return Result.success("图片 URL 更新成功");
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("图片 URL 更新失败");
+            return Result.error("500", "图片 URL 更新失败");
         }
     }
 
@@ -82,15 +84,25 @@ public class PlaylistController {
 
     // 添加歌曲到歌单
     @PostMapping("/{playlistId}/songs/add")
-    public void addSongToPlaylist(@PathVariable Integer playlistId, @RequestBody Map<String, String> request) {
+    public Result  addSongToPlaylist(@PathVariable Integer playlistId, @RequestBody Map<String, String> request) {
         String songName = request.get("songName");
+        if (songName == null || songName.isEmpty()) {
+            return Result.error("400", "歌曲名不能为空");
+        }
+
         Integer songId = playlistService.getSongIdBySongName(songName);
+        if (songId == null) {
+            return Result.error("404", "歌曲未找到");
+        }
+
         playlistService.addSongToPlaylist(playlistId, songId);
+        return Result.success("歌曲添加到歌单成功");
     }
 
     // 从歌单中删除歌曲
     @DeleteMapping("/{playlistId}/songs/{songId}")
-    public void deleteSongFromPlaylist(@PathVariable Integer playlistId, @PathVariable Integer songId) {
+    public Result  deleteSongFromPlaylist(@PathVariable Integer playlistId, @PathVariable Integer songId) {
         playlistService.deleteSongFromPlaylist(playlistId, songId);
+        return Result.success("歌曲从歌单中删除成功");
     }
 }

@@ -48,4 +48,18 @@ public interface SongMapper {
     //更新MP地址
     @Update("UPDATE songs SET mp3_url = #{mp3Url} WHERE id = #{id}")
     int updateSongMp3(@Param("id") Integer id, @Param("mp3Url") String mp3Url);
+
+    //搜索歌曲
+    @Select("SELECT * FROM songs WHERE song_name LIKE #{keyword} OR singer_name LIKE #{keyword} OR album_name LIKE #{keyword}")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "singerId", column = "singer_id"),
+            @Result(property = "singerName", column = "singer_name"),
+            @Result(property = "songName", column = "song_name"),
+            @Result(property = "albumName", column = "album_name"),
+            @Result(property = "lyrics", column = "lyrics"),
+            @Result(property = "picUrl", column = "pic_url"),
+            @Result(property = "mp3Url", column = "mp3_url")
+    })
+    List<Song> searchSongs(@Param("keyword") String keyword);
 }

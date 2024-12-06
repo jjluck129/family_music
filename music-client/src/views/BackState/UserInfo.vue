@@ -118,8 +118,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   data() {
     return {
@@ -167,7 +165,7 @@ export default {
   },
   methods: {
     loadUserData(){
-      axios.get('/users').then(response => {
+      this.$request.get('/users').then(response => {
         this.users = response.data;
       }).catch(error => {
         console.error("获取用户数据失败", error);
@@ -175,7 +173,7 @@ export default {
     },
     // 添加用户
     addUser() {
-      axios.post('/users/add', this.addForm).then(() => {
+      this.$request.post('/users/add', this.addForm).then(() => {
         this.addDialogVisible = false;
         this.loadUserData();
       }).catch(error => {
@@ -188,7 +186,7 @@ export default {
       this.editDialogVisible = true;
     },
     saveEdit() {
-      axios.put(`/users/update/${this.editForm.id}`, this.editForm).then(() => {
+      this.$request.put(`/users/update/${this.editForm.id}`, this.editForm).then(() => {
         this.loadUserData();
         this.editDialogVisible = false;
       }).catch(error => {
@@ -197,7 +195,7 @@ export default {
     },
     // 删除单个用户
     deleteRow(id) {
-      axios.delete(`/users/delete/${id}`).then(() => {
+      this.$request.delete(`/users/delete/${id}`).then(() => {
         this.loadUserData();
       }).catch(error => {
         console.error('删除用户失败', error);
@@ -206,7 +204,7 @@ export default {
     // 批量删除
     deleteAll() {
       const ids = this.multipleSelection.map(user => user.id);
-      axios.delete(`/users/deleteBatch`, { data: ids }).then(() => {
+      this.$request.delete(`/users/deleteBatch`, { data: ids }).then(() => {
         this.loadUserData();
         this.multipleSelection = [];
       }).catch(error => {
@@ -225,7 +223,7 @@ export default {
     handleAvatarSuccess(response, userId) {
       const avatarUrl = response.url;
       console.log(avatarUrl);
-      axios.put(`/users/updateAvatar/${userId}`, { avatar: avatarUrl })
+      this.$request.put(`/users/updateAvatar/${userId}`, { avatar: avatarUrl })
         .then(() => {
           this.$message.success('头像更新成功');
           this.loadUserData();

@@ -68,8 +68,14 @@
           <button class="close-btn" @click="togglePlaylist">×</button>
           <h3>播放列表</h3>
           <ul>
-            <li v-for="(song, index) in playList" :key="index">
-              <span style="text-align: left;">{{ song.songName }}</span> - <span>{{ song.singerName }}</span> - <span ><button @click="deletePlayItem(index)"><i class="fa fa-trash-o" aria-hidden="true"></i></button></span>
+            <li v-for="song in playList" :key="song.id">
+              <span class="playlist-content-songname">{{ song.songName }}</span>
+              <span class="playlist-content-singername">{{ song.singerName }}</span>
+              <span class="playlist-content-delete">
+                <!-- <button @click="deletePlayItem(index)" class="playlist-content-delete"> -->
+                  <i class="fa-regular fa-trash-can" @click="removeSong(song.id)"></i>
+                <!-- </button> -->
+              </span>
             </li>
           </ul>
         </div>
@@ -93,11 +99,12 @@
         :ref="'lyricItem' + index"
         :class="{
           'current-lyric': line.isCurrent,
-          'passed-lyric': line.isPassed
+          'passed-lyric': !line.isCurrent && line.isPassed,
         }"
         class="lyric-item"
       >
         {{ line.text }}
+        <span v-if="line.isCurrent && line.timeToNext" class="time-to-next">({{ line.timeToNext }}s)</span>
       </div>
     </div>
   </div>
@@ -109,7 +116,7 @@ export default {
   data() {
     return {
       progress: 0, // 当前进度
-      volume: 50, // 默认音量值
+      volume: 35, // 默认音量值
       isMuted: false, // 静音状态
       currentTime: '00:00', // 当前播放时间
       totalTime: '00:00', // 总时长
@@ -214,10 +221,12 @@ export default {
     },
     
     togglePlaylist() {
+      if(this.showLyrics) this.showLyrics = !this.showLyrics
       this.isPlaylistOpen = !this.isPlaylistOpen;
       console.log(this.playList)
     },
     toggleLyricsDisplay() {
+      if(this.isPlaylistOpen) this.isPlaylistOpen = !this.isPlaylistOpen;
       this.showLyrics = !this.showLyrics; // 切换歌词显示状态
     },
     // updateProgress() {
@@ -275,22 +284,37 @@ export default {
       const matches = [...lyrics.matchAll(timePattern)];
 
       // 解析并生成当前显示的歌词行
-      const currentLine = matches.map((match) => {
-        const minutes = parseInt(match[1], 10);
-        const seconds = parseInt(match[2], 10);
-        const milliseconds = parseInt(match[3], 10);
-        const timestamp = minutes * 60 + seconds + milliseconds / 1000;
-        const isCurrent = currentTime >= timestamp && currentTime < timestamp + 0.8;
-        const isPassed = currentTime > timestamp;
+      const parsedLyrics = matches
+        .map(match => {
+          const minutes = parseInt(match[1], 10);
+          const seconds = parseInt(match[2], 10);
+          const milliseconds = Math.round(parseInt(match[3], 10) / 10); // 四舍五入到两位数
+
+          const roundedMilliseconds = milliseconds.toString().padStart(2, '0'); // 补齐两位
+          const timestamp = parseFloat(`${minutes * 60 + seconds}.${roundedMilliseconds}`);
+          const text = match[4].trim();
+
+          // 过滤掉空行或无效歌词
+          if (!text || isNaN(timestamp)) return null;
+
+          return { text, timestamp };
+        })
+        .filter(line => line !== null); // 移除空行
+
+      // 更新显示的歌词状态
+      const displayed = parsedLyrics.map((line, index) => {
+        const nextTimestamp = parsedLyrics[index + 1]?.timestamp || Infinity;
+        const isCurrent = currentTime >= line.timestamp && currentTime < nextTimestamp;
+        const isPassed = currentTime > line.timestamp;
+
         return {
-          text: match[4].trim(),
-          timestamp: timestamp,
-          isCurrent: isCurrent,
-          isPassed: isPassed
+          ...line,
+          isCurrent,
+          isPassed,
         };
       });
 
-      this.displayedLyrics = currentLine;
+      this.displayedLyrics = displayed;
 
       this.$nextTick(() => {
         // 获取当前歌词行的索引
@@ -308,6 +332,9 @@ export default {
           }
         }
       });
+    },
+    removeSong(songId) {
+      this.$store.dispatch('removeSong',songId);
     }
 
   },
@@ -315,12 +342,13 @@ export default {
 </script>
 <style scoped>
 .front-bottom {
-    position: fixed;
+    /* position: fixed;
     bottom: 0;
     left: 0.67cap;
     right: 0.67cap;
-    width: 96%;
-    margin-top: 35px;
+    width: 96%; */
+    position: relative;
+    margin-top: -41px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -452,7 +480,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
   padding: 20px;
-  z-index: 100;
+  z-index: 10000;
   max-height: 50%;
   overflow-y: auto;
   margin-bottom: 70px;
@@ -496,6 +524,24 @@ export default {
 .playlist-content .close-btn:hover {
   color: #f00;
 }
+
+.playlist-content-songname{
+  width: 130px;
+  position: absolute;
+  left: 26%;
+}
+
+.playlist-content-singername{
+  position: relative;
+  left: 30px;
+}
+.playlist-content-delete{
+  position: absolute;
+  left: 66%;
+  padding: 2px;
+  cursor: pointer;
+}
+
 .lyrics-container {
   position: fixed;
   bottom: 0;
@@ -514,18 +560,25 @@ export default {
   font-size: 18px;
   padding: 8px;
   line-height: 1.6;
+  transition: color 0.3s ease;
 }
 
 .current-lyric {
-  color: green;
+  color: greenyellow;
   font-weight: bold;
 }
 
 .passed-lyric {
-  color: white;
+  color: green;
 }
 
-.lyrics-container .lyric-item {
-  transition: all 0.3s ease;
+.lyrics-container::-webkit-scrollbar {
+    width: 6px;
+}
+.lyrics-container::-webkit-scrollbar-track {
+  background-color: #f0f0f0;
+}
+.lyrics-container::-webkit-scrollbar-thumb {
+    background-color: green;
 }
 </style>

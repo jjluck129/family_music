@@ -8,7 +8,16 @@
             <span class="brand-title">Family Mood</span>
         </div>
         <div class="front-header-center">
-            <input type="text" class="search-box" placeholder="搜索音乐、歌手..." />
+            <!-- <input type="text" class="search-box" placeholder="搜索音乐、歌手..." /> -->
+            <el-input
+              v-model="searchQuery"
+              placeholder="搜索歌曲、歌手或专辑"
+              class="search-box"
+              @keyup.enter="searchSongs"
+              clearable
+            >
+            <el-button icon="el-icon-search" @click="searchSongs"></el-button>
+          </el-input>
         </div>
         <div class="front-header-right">
           <div v-if="user.username" class="user-menu">
@@ -16,10 +25,12 @@
               class="username"
               @click="toggleDropdown"
             >
-              {{ user.username }}
-              <i class="fas fa-caret-down"></i>
+              <!-- {{ user.username }} -->
+              <img :src="user.avatar" alt="" style="width: 50px; height: 50px; border-radius: 40px; top: 5px;">
+              <!-- <i class="fas fa-caret-down"></i> -->
             </span>
             <div v-if="isDropdownVisible" class="dropdown-menu">
+              <span class="dropdown-item"><router-link to="/homepage/userprofile" class="auth-mes">个人信息</router-link></span>
               <button @click="logout" class="dropdown-item">退出</button>
             </div>
           </div>
@@ -77,7 +88,7 @@
               <router-link to="#"><i class="fas fa-broadcast-tower" style="color: burlywood;"></i> <span v-if="isSidebarOpen">电台</span></router-link>
             </li>
             <li :class="{ active: activeMenu === 'movie' }" @click="setActive('movie')">
-              <router-link to="/homepage/playlist"><i class="fas fa-film" style="color: brown;"></i> <span v-if="isSidebarOpen">影片</span></router-link>
+              <router-link to="/homepage/chatpage"><i class="fa-regular fa-comment" style="color: blueviolet;"></i> <span v-if="isSidebarOpen">会话</span></router-link>
             </li>
           </ul>
         </div>
@@ -123,6 +134,7 @@ export default {
       activeMenu: 'discover', // 默认选中“发现音乐”
       isSidebarOpen: false,    // 侧边栏初始状态为打开
       isDropdownVisible:false,
+      searchQuery:'',
     };
   },
   mounted() {
@@ -164,6 +176,16 @@ export default {
       console.log(this.user);
       console.log(this.user.username);
       this.isSidebarOpen = !this.isSidebarOpen; // 切换侧边栏的显示状态
+    },
+    searchSongs() {
+      if (this.searchQuery.trim()) {
+        this.$router.push({ 
+          path: "/homepage/searchresults", 
+          query: { keyword: this.searchQuery.trim() } 
+        });
+      } else {
+        this.$message.warning("请输入搜索内容！");
+      }
     },
     logout(){
       localStorage.removeItem("family-user");
@@ -228,7 +250,7 @@ export default {
   height: 55%;
   margin-top: 7px;
   margin-left: -100px;
-  padding: 5px;
+  padding: 2px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
@@ -259,6 +281,7 @@ export default {
 
 /* 下拉菜单样式 */
 .dropdown-menu {
+  width: 100px;
   position: absolute;
   top: 60px;
   right: 20px;
@@ -271,17 +294,22 @@ export default {
 }
 
 .dropdown-item {
-  padding: 10px 20px;
+  height: 40px;
+  padding: 5px 0 20px 0;
   cursor: pointer;
   display: block;
   background: none;
   border: none;
   color: white;
-  text-align: left;
+  text-align: center;
   width: 100%;
 }
 .dropdown-item:hover {
   background: #444;
+}
+.auth-mes{
+  color: #ffffff;
+  text-decoration: none;
 }
 
 
@@ -475,6 +503,7 @@ color: #a0a0a0;
   background-color: #f5f5f5; /* 内容区背景颜色 */
   overflow-y: auto; /* 允许竖向滚动 */
   overflow-x: hidden; /* 禁止横向滚动 */
+  margin-bottom: 35px;
 }
 
 </style>

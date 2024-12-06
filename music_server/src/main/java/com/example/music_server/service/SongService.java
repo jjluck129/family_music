@@ -24,4 +24,6 @@ public interface SongService {
     boolean updateSongPic(Integer id, String picUrl);
 
     boolean updateSongMp3(Integer id, String mp3Url);
+
+    List<Song> searchSongs(String keyword);
 }

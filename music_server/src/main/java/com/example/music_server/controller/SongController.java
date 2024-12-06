@@ -1,5 +1,6 @@
 package com.example.music_server.controller;
 
+import com.example.music_server.common.Result;
 import com.example.music_server.entity.Song;
 import com.example.music_server.service.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,35 +25,37 @@ public class SongController {
 
     // 根据歌手ID获取歌曲列表
     @GetMapping("/list/{singerId}")
-    public List<Song> getSongsBySingerId(@PathVariable Integer singerId) {
+    public Result getSongsBySingerId(@PathVariable Integer singerId) {
         List<Song> songs = songService.getSongsBySingerId(singerId);
-        return songs;
+        return Result.success(songs);
     }
 
     // 添加歌曲
     @PostMapping("/add")
-    public String addSong(@RequestBody Song song) {
+    public Result  addSong(@RequestBody Song song) {
         songService.addSong(song);
-        return "添加成功";
+        return Result.success("添加成功");
     }
 
     // 删除歌曲
     @DeleteMapping("/delete/{id}")
-    public String deleteSong(@PathVariable Integer id) {
+    public Result deleteSong(@PathVariable Integer id) {
         songService.deleteSong(id);
-        return "删除成功";
+        return Result.success("删除成功");
     }
 
     // 更新歌曲
     @PutMapping("/update")
-    public String updateSong(@RequestBody Song song) {
+    public Result  updateSong(@RequestBody Song song) {
         songService.updateSong(song);
-        return "更新成功";
+        return Result.success("更新成功");
     }
 
     // 上传MP3文件
     @PostMapping("/uploadMp3")
-    public ResponseEntity<Map<String, String>> uploadMp3(@RequestParam("mp3") MultipartFile mp3File, @RequestParam("songId") Integer songId) {
+    public ResponseEntity<Map<String, String>> uploadMp3(
+            @RequestParam("mp3") MultipartFile mp3File,
+            @RequestParam("songId") Integer songId) {
         System.out.println("Received songId: " + songId); // 打印 songId
         System.out.println("Received mp3 file: " + mp3File.getOriginalFilename()); // 打印文件名
         if (mp3File.isEmpty()) {
@@ -110,4 +113,13 @@ public class SongController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("图片 URL 更新失败");
         }
     }
+
+//    搜索歌曲
+    @GetMapping("/search")
+    public Result searchSongs(@RequestParam("keyword") String keyword){
+        List<Song> songs = songService.searchSongs(keyword);
+        System.out.println(songs);
+        return Result.success(songs);
+    }
+
 }

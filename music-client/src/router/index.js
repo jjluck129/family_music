@@ -28,8 +28,12 @@ const routes = [
       { path: 'singerlist', name: 'SingerList', meta: { name: '歌手' }, component: () => import('../views/Front/SingerList.vue')},
       { path: 'singerdetail/:singerId', name: 'SingerDetail', component:() =>import('../views/Front/SingerDetail.vue')},
       { path: 'playlist', name: 'PlayList', meta: { name: '播放列表' }, component: () => import('../views/Front/PlayList.vue')},
+      { path: 'searchresults', name: 'SearchResults', meta: { name: '搜索结果' }, component: () => import('../views/Front/SearchResults.vue') },
+      { path: 'userprofile', name: 'UserProfile', meta: { name: '用户信息' }, component: () => import('../views/Front/UserProfile.vue') },
+      { path: 'chatpage', name: 'ChatPage', meta: { name: '会话页面' }, component: () => import('../views/Front/ChatPage.vue') },
       { path: 'userlogin', name: 'UserLogin', meta: { name: '用户登录' }, component: () => import('../views/UserLogin.vue') },
       { path: 'userregister', name: 'UserRegister', meta: { name: '用户注册' }, component: () => import('../views/UserRegister.vue') },
+      
     ]
   },
  

@@ -50,8 +50,6 @@
   </template>
   
   <script>
-  import axios from 'axios';
-  
   export default {
     data() {
       return {
@@ -83,7 +81,7 @@
     methods: {
       // 获取歌曲数据
       loadSongs() {
-        axios.get(`/playlist/${this.playlistId}/songs`).then((response) => {
+        this.$request.get(`/playlist/${this.playlistId}/songs`).then((response) => {
           this.songs = response.data;
           console.log(this.songs)
         }).catch((error) => {
@@ -93,7 +91,7 @@
       // 批量删除歌曲
       deleteSelected() {
         const ids = this.multipleSelection.map(item => item.id);
-        axios.delete(`/playlist/${this.playlistId}/songs/deleteBatch`, { data: ids }).then(() => {
+        this.$request.delete(`/playlist/${this.playlistId}/songs/deleteBatch`, { data: ids }).then(() => {
           this.loadSongs();
           this.multipleSelection = [];
         }).catch((error) => {
@@ -102,16 +100,18 @@
       },
       // 删除单首歌曲
       deleteSong(id) {
-        axios.delete(`/playlist/${this.playlistId}/songs/delete/${id}`).then(() => {
+        this.$request.delete(`/playlist/${this.playlistId}/songs/delete/${id}`).then(() => {
+          this.$message.success('歌曲删除成功');
           this.loadSongs();
         }).catch((error) => {
           console.error('删除歌曲失败', error);
+          this.$message.error('删除歌曲失败，请稍后重试');
         });
       },
       // 添加歌曲
       addSong() {
         console.log(this.playlistId)
-        axios.post(`/playlist/${this.playlistId}/songs/add`, this.addSongForm).then(() => {
+        this.$request.post(`/playlist/${this.playlistId}/songs/add`, this.addSongForm).then(() => {
           this.loadSongs();
           this.addSongDialogVisible = false;
           this.addSongForm = { id: '', songName: '' }; // 清空表单

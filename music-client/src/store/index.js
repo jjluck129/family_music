@@ -65,6 +65,27 @@ export default createStore({
     clearPlaylist(state) {
       state.playlist = [];
     },
+    //删除播放列表歌曲
+    removeFromPlaylist(state,songId){
+        const index = state.playlist.findIndex(song => song.id === songId);
+
+        // 如果当前歌曲是删除的那首，调整 currentSong
+        if (state.currentSong && state.currentSong.id === songId) {
+          if (index === state.playlist.length - 1) {
+            // 当前是最后一首，播放上一首
+            state.currentSong = state.playlist[index - 1] || null;
+          } else {
+            // 否则播放下一首
+            state.currentSong = state.playlist[index + 1] || null;
+          }
+        }
+
+        // 从播放列表中移除歌曲
+        if (index !== -1) {
+          state.playlist.splice(index, 1);
+        }
+    },
+    //设置播放顺序
     setPlayMode(state, mode) {
       state.isShuffle = mode === 'shuffle';
       state.isLoop = mode === 'loop';
@@ -158,6 +179,9 @@ export default createStore({
       // 恢复播放列表为顺序
       // 假设 initialPlaylist 是初始顺序的播放列表
       commit('setPlaylist', state.initialPlaylist || [...state.playlist]);
+    },
+    removeSong({ commit }, songId) {
+      commit('removeFromPlaylist', songId);
     },
   },
   getters: {
