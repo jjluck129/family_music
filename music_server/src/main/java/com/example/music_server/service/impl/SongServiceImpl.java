@@ -57,4 +57,13 @@ public class SongServiceImpl implements SongService {
         return songMapper.searchSongs("%" + keyword + "%");
     }
 
+    @Override
+    public List<Song> getAllAlbums(){
+        return songMapper.getAllAlbums();
+    }
+
+    @Override
+    public List<Song> getSongsByAlbum(String albumName){
+        return songMapper.getSongsByAlbum(albumName);
+    }
 }

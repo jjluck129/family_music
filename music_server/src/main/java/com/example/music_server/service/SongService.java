@@ -26,4 +26,10 @@ public interface SongService {
     boolean updateSongMp3(Integer id, String mp3Url);
 
     List<Song> searchSongs(String keyword);
+
+    //获取专辑
+    List<Song> getAllAlbums();
+
+    //根据专辑获取歌曲
+    List<Song> getSongsByAlbum(String albumName);
 }

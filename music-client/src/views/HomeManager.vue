@@ -3,11 +3,12 @@
       <!-- 顶部导航栏 -->
       <el-header class="header">
         <div class="header-left">
-          <el-button type="text" @click="toggleCollapse" class="toggle-button">
+          <!-- <el-button type="text" @click="toggleCollapse" class="toggle-button">
             <i :class="collapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
-          </el-button>
-          <img src="@/assets/img/familymood.png" alt="" style="width: 50px; height: 50px;">
-          <span class="title">Family Mood</span>
+          </el-button> -->
+          <img src="@/assets/familymood.png" alt="" style="width: 60px; height: 60px;">
+          <span class="title">Family Mood 后台管理</span>
+          <el-button type="primary" class="home-button" @click="goHome">首页</el-button>
         </div>
         <div class="header-right">
           <el-dropdown @command="handleCommand">
@@ -86,7 +87,10 @@
           this.$message('退出登录');
           // 处理退出登录逻辑
         }
-      }
+      },
+      goHome() {
+      this.$router.push({ path: '/homepage' }); // 跳转到首页
+    }
     }
   };
   </script>
@@ -108,8 +112,12 @@
     color: black;
     height: 60px;
   }
-  
+  .header-left{
+    display: flex;
+  }
+
   .title {
+    margin-top: 20px;
     font-size: 18px;
     font-weight: bold;
     margin-left: 20px;
@@ -119,7 +127,22 @@
     margin-left: 10px; /* 使按钮与标题分开 */
     font-size: 18px; /* 增大图标的字体大小 */
   }
-  
+  .home-button {
+    margin-left: 20px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+    padding: 0 15px;
+    color: #fff;
+    background-color: #409eff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .home-button:hover {
+    background-color: #66b1ff;
+  }
   .content {
     height: calc(100vh - 60px); /* 扣除顶部导航的高度 */
     display: flex;

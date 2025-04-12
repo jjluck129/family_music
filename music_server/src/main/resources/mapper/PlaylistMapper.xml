@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.music_server.mapper.PlaylistMapper">
+
+    <select id="getAllPlaylist" resultMap="PlaylistResultMap">
+        SELECT * FROM playlist
+    </select>
+    <resultMap id="PlaylistResultMap" type="com.example.music_server.entity.Playlist">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="introduction" column="introduction"/>
+        <result property="style" column="style"/>
+        <result property="imgUrl" column="img_url"/>
+    </resultMap>
+
+    <insert id="addPlaylist">
+        INSERT INTO playlist (title,introduction,style)
+        VALUES (#{title}, #{introduction}, #{style})
+    </insert>
+
+    <delete id="deletePlaylist">
+        DELETE FROM playlist WHERE id = #{id}
+    </delete>
+
+    <update id="updatePlaylist">
+        UPDATE playlist SET title = #{title}, introduction = #{introduction}, style = #{style}
+        WHERE id = #{id}
+    </update>
+
+    <select id="getPlaylisyById" resultMap="PlaylistResultMap">
+        SELECT * FROM playlist WHERE id = #{playlistId}
+    </select>
+
+    <update id="updatePlaylistPic">
+        UPDATE playlist SET img_url = #{imgUrl} WHERE id = #{id}
+    </update>
+
+    <select id="getSongsByPlaylistId" resultMap="PlaylistSongResultMap">
+        SELECT * FROM playlist_song WHERE playlist_id = #{playlistId}
+    </select>
+    <resultMap id="PlaylistSongResultMap" type="com.example.music_server.entity.PlaylistSong">
+        <id property="id" column="id"/>
+        <result property="songId" column="song_id"/>
+        <result property="playlistId" column="playlist_id"/>
+    </resultMap>
+
+    <insert id="addPlaylistSong">
+        INSERT INTO playlist_song (playlist_id, song_id) VALUES (#{playlistId}, #{songId})
+    </insert>
+
+    <delete id="deleteSongsByPlaylistId">
+        DELETE FROM playlist_song WHERE playlist_id = #{playlistId}
+    </delete>
+
+    <delete id="deleteSongFromPlaylist">
+        DELETE FROM playlist_song WHERE playlist_id = #{playlistId} AND song_id = #{songId}
+    </delete>
+
+    <select id="getSongIdBySongName">
+        select id from songs where song_name = #{songName}
+    </select>
+
+</mapper>

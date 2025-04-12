@@ -37,10 +37,10 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    public String updateUser(@PathVariable Integer id, @RequestBody User user) {
+    public Result updateUser(@PathVariable Integer id, @RequestBody User user) {
         user.setId(id);
         userService.updateUser(user);
-        return "更新成功";
+        return Result.success();
     }
 
     @PutMapping("/updateAvatar/{id}")
@@ -81,28 +81,24 @@ public class UserController {
     /**
      * 用户注册
      */
-//    @PostMapping("/register")
-//    public ResponseEntity<?> registerUser(@RequestBody User user) {
-//        // 检查用户名是否唯一
-//        if (userService.existsByUsername(user.getUsername())) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("用户名已存在");
-//        }
-//
-//        // 对密码进行加密
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//
-//        // 保存用户信息
-//        userService.addUser(user);
-//        return ResponseEntity.status(HttpStatus.CREATED).body("注册成功");
-//    }
+    @PostMapping("/register")
+    public Result register(@RequestBody User user){
+        if(userService.register(user)){
+            return Result.success("注册成功");
+        }else{
+            return Result.error("500","注册失败");
+        }
+    }
 
     /**
      * 用户登录
      */
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
+        System.out.println(user);
         try {
             User loggedInUser = userService.login(user);
+            System.out.println(loggedInUser);
             return Result.success(loggedInUser); // 登录成功返回数据
         } catch (ServiceException e) {
             return Result.error(e.getCode(), e.getMessage()); // 捕获自定义异常返回错误信息
@@ -111,4 +107,12 @@ public class UserController {
         }
     }
 
+    /**
+     * 更新用户状态
+     */
+    @PutMapping("/updateStatus/{username}")
+    public Result updateStatusByUsername(@PathVariable String username) {
+        userService.updateStatusByUsername(username);
+        return Result.success();
+    }
 }

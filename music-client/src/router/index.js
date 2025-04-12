@@ -4,6 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'HomeManager',
+    redirect:'homepage',
     component: () => import('../views/HomeManager.vue'),
     children: [
       { path: 'testpage', name: 'TestPage', meta: { name: '测试页面' }, component: () => import('../views/BackState/TestPage.vue') },
@@ -29,8 +30,11 @@ const routes = [
       { path: 'singerdetail/:singerId', name: 'SingerDetail', component:() =>import('../views/Front/SingerDetail.vue')},
       { path: 'playlist', name: 'PlayList', meta: { name: '播放列表' }, component: () => import('../views/Front/PlayList.vue')},
       { path: 'searchresults', name: 'SearchResults', meta: { name: '搜索结果' }, component: () => import('../views/Front/SearchResults.vue') },
+      { path: 'albumlist', name: 'AlbumList', meta: { name: '专辑页面' }, component: () => import('../views/Front/AlbumList.vue') },
+      { path: 'albumdetail/:albumName', name: 'AlbumDetail', meta: { name: '专辑详情' }, component: () => import('../views/Front/AlbumDetail.vue') },
       { path: 'userprofile', name: 'UserProfile', meta: { name: '用户信息' }, component: () => import('../views/Front/UserProfile.vue') },
       { path: 'chatpage', name: 'ChatPage', meta: { name: '会话页面' }, component: () => import('../views/Front/ChatPage.vue') },
+      { path: 'likemusic', name: 'LikeMusic', meta: { name: '用户喜欢' }, component: () => import('../views/Front/LikeMusic.vue') },
       { path: 'userlogin', name: 'UserLogin', meta: { name: '用户登录' }, component: () => import('../views/UserLogin.vue') },
       { path: 'userregister', name: 'UserRegister', meta: { name: '用户注册' }, component: () => import('../views/UserRegister.vue') },
       

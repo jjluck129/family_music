@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.music_server.mapper.SongLikeMapper">
+
+    <resultMap id="SongLikeResultMap" type="com.example.music_server.entity.SongLike">
+        <id property="id" column="id" />
+        <result property="songId" column="song_id" />
+        <result property="userId" column="user_id" />
+    </resultMap>
+
+    <!-- 查询用户喜欢的歌曲 ID -->
+    <select id="getLikedSongIdsByUserId" resultType="java.lang.Integer">
+        SELECT song_id FROM song_like WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insertSongLike" parameterType="com.example.music_server.entity.SongLike" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO song_like (song_id, user_id)
+        VALUES (#{songId}, #{userId})
+    </insert>
+
+    <delete id="deleteSongLike" parameterType="map">
+        DELETE FROM song_like
+        WHERE user_id = #{userId} AND song_id = #{songId}
+    </delete>
+
+    <select id="selectSongLikesByUserId" parameterType="int" resultMap="SongLikeResultMap">
+        SELECT song_id FROM song_like WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectSongLike" parameterType="map" resultMap="SongLikeResultMap">
+        SELECT id, song_id, user_id FROM song_like
+        WHERE user_id = #{userId} AND song_id = #{songId}
+    </select>
+
+    <!-- 判断用户是否已喜欢该歌曲 -->
+    <select id="isLiked" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0 FROM song_like WHERE user_id = #{userId} AND song_id = #{songId}
+    </select>
+</mapper>

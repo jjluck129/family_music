@@ -101,10 +101,33 @@
       // 提交表单
       submitForm() {
         // 提交表单修改
-        this.$message.success("修改成功！");
-        console.log("修改后的表单数据：", this.form);
-        // 模拟保存数据到 localStorage
-        localStorage.setItem("family-user", JSON.stringify(this.form));
+        const userInfo = JSON.parse(localStorage.getItem("family-user")) || {};
+        const updatedUserInfo = {
+          ...userInfo,  
+          username: this.form.username, 
+          gender: this.form.gender, 
+          telephone: this.form.telephone, 
+          email: this.form.email,
+          birth: this.form.birth,
+          introduction: this.form.introduction, 
+        };
+        const token = userInfo.token; 
+        localStorage.setItem("family-user", JSON.stringify({ ...updatedUserInfo, token }));
+
+        const userId = userInfo.id;
+        this.$request
+          .put(`/users/update/${userId}`, updatedUserInfo)
+          .then(() => {
+            // 更新成功后，保存到 localStorage
+            const updatedData = { ...userInfo, ...updatedUserInfo };
+            localStorage.setItem("family-user", JSON.stringify(updatedData));
+            
+            // 提示用户修改成功
+            this.$message.success("修改成功！");
+          })
+          .catch(() => {
+            this.$message.error("更新失败，请重试！");
+          });
       },
       // 重置表单
       resetForm() {

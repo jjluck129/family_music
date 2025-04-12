@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.music_server.mapper.UserMapper">
+
+    <select id="getAlluser" resultMap="UserResultMap">
+        SELECT * FROM user
+    </select>
+    <resultMap id="UserResultMap" type="com.example.music_server.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="gender" column="gender"/>
+        <result property="telephone" column="telephone"/>
+        <result property="email" column="email"/>
+        <result property="birth" column="birth"/>
+        <result property="introduction" column="introduction"/>
+        <result property="location" column="location"/>
+        <result property="avatar" column="avatar"/>
+        <result property="role" column="role"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="count">
+        SELECT COUNT(*) FROM user WHERE username LIKE CONCAT('%', #{searchWord}, '%') OR email LIKE CONCAT('%', #{searchWord}, '%')
+    </select>
+
+    <select id="getAllUsers" resultMap="UserResultMap">
+        SELECT username, status FROM user
+    </select>
+
+    <select id="findById" resultMap="UserResultMap">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <insert id="addUser">
+        INSERT INTO user (username, password, gender, telephone, email, birth, introduction, location, avatar,role, create_time, update_time)
+        VALUES (#{username}, #{password}, gender = #{gender}, telephone = #{telephone}, email = #{email}, #{birth}, #{introduction}, #{location}, #{avatar},#{role},#{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="register" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, gender, telephone, email, birth, introduction, location, avatar, role, create_time, update_time)
+        VALUES (#{username}, #{password}, #{gender}, #{telephone}, #{email}, #{birth}, #{introduction}, #{location}, #{avatar}, #{role}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="com.example.music_server.entity.User">
+        UPDATE user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="telephone != null">telephone = #{telephone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="birth != null">birth = #{birth},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateAvatar">
+        UPDATE user SET avatar = #{avatar}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBatch">
+        <![CDATA[
+        DELETE FROM user WHERE id IN
+        <foreach item='id' collection='ids' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+        ]]>
+    </delete>
+
+    <select id="existsByUsername" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `user` WHERE username = #{username}
+    </select>
+
+    <select id="findByUsername" resultMap="UserResultMap" flushCache="true">
+        SELECT * FROM `user` WHERE username = #{username}
+    </select>
+
+    <update id="updateStatusByUsername">
+        UPDATE user
+        SET status = ! status
+        WHERE username = #{username}
+    </update>
+</mapper>

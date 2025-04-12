@@ -13,6 +13,8 @@ public class User {
     private String introduction;
     private String location;
     private String avatar;
+    private String role;
+    private Boolean status;
     private Date createTime;
     private Date updateTime;
 
@@ -97,6 +99,14 @@ public class User {
         this.avatar = avatar;
     }
 
+    public String getRole() { return role; }
+
+    public void setRole(String role) { this.role = role; }
+
+    public Boolean getStatus() { return status; }
+
+    public void setStatus(Boolean status) { this.status = status; }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -134,8 +144,11 @@ public class User {
                 ", introduction='" + introduction + '\'' +
                 ", location='" + location + '\'' +
                 ", avatar='" + avatar + '\'' +
+                ", role='" + role + '\'' +
+                ", status='" + status + '\'' +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

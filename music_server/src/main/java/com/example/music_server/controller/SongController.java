@@ -30,6 +30,13 @@ public class SongController {
         return Result.success(songs);
     }
 
+    // 获取专辑信息
+    @GetMapping("/albums")
+    public Result getAllAlbums() {
+        List<Song> albums = songService.getAllAlbums();
+        return Result.success(albums);
+    }
+
     // 添加歌曲
     @PostMapping("/add")
     public Result  addSong(@RequestBody Song song) {
@@ -122,4 +129,12 @@ public class SongController {
         return Result.success(songs);
     }
 
+
+    //根据专辑名搜索歌曲
+    @GetMapping("/albumtosong/{albumName}")
+    public Result getSongsByAlbum(@PathVariable("albumName") String albumName){
+        List<Song> songs = songService.getSongsByAlbum(albumName);
+        System.out.println(songs);
+        return Result.success(songs);
+    }
 }

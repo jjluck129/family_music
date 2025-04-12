@@ -20,7 +20,7 @@
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item :command="['playlist', scope.row]">添加到播放列表</el-dropdown-item>
-                            <el-dropdown-item :command="['favorite', scope.row]">添加到收藏</el-dropdown-item>
+                            <el-dropdown-item :command="['favorite', scope.row]">添加到喜欢</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -77,13 +77,44 @@ methods: {
     handleAddCommand([command,song]){
         console.log(song);
         console.log(command);
+        const user = JSON.parse(localStorage.getItem("family-user") || "null");
+        if (!user) {
+        this.$message.warning("请先登录");
+        return;
+        }
+        const userId = user.id;
             if (command === "playlist") {
-            // 调用 Vuex 的 addToPlaylist 方法
                 this.$store.commit("addToPlaylist", song);
                 this.$message.success(`已将歌曲 "${song.songName}" 添加到播放列表`);
             } else if (command === "favorite") {
-                this.$message.success(`已将歌曲 "${song.songName}" 添加到收藏`);
                 // 调用后端接口处理收藏功能
+                this.$request
+                    .get(`/songlike/check`, { params: { userId: userId, songId: song.id } })
+                    .then(response => {
+                        if (response.code === "200") {
+                            this.$message.info("你已添加至喜欢");
+                        } else {
+                        const likeData = { songId: song.id, userId: userId };
+                        this.$request
+                            .post("/songlike/add", likeData)
+                            .then(resp => {
+                                console.log(resp)
+                            if (resp.code === "200") {
+                                this.$message.success("喜欢成功");
+                            } else {
+                                this.$message.error(resp.msg || "添加喜欢失败");
+                            }
+                            })
+                            .catch(err => {
+                                this.$message.error("添加喜欢出错");
+                                console.error(err);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        this.$message.error("检查喜欢状态出错");
+                        console.error(error);
+                    });
             }
         
     }

@@ -125,6 +125,7 @@ export default {
       showLyrics: false,
       playList:[],
       isPlaylistOpen: false,
+      isKeydownListenerAdded: false
     };
   },
   computed: {
@@ -154,6 +155,12 @@ export default {
   },
   mounted() {
     this.setTotalTime();
+    window.addEventListener('keydown', (event) => this.handleKeydown(event));
+  },
+  beforeUnmount() {
+   
+    // 组件销毁时移除事件监听器
+    window.removeEventListener('keydown', (event) => this.handleKeydown(event));
   },
   watch:{
     currentSong(newSong) {
@@ -176,6 +183,11 @@ export default {
         audio.play();
       }
       this.isPlaying = !this.isPlaying; // 切换播放状态
+    },
+    handleKeydown(event) {
+      if (event.code === 'Space') {
+        this.togglePlayPause();
+      }
     },
     onPlay() {
       this.$store.commit('play');  // 播放时更新状态
@@ -483,7 +495,7 @@ export default {
   z-index: 10000;
   max-height: 50%;
   overflow-y: auto;
-  margin-bottom: 70px;
+  margin-bottom: 78px;
     width: 50%;
 
 }
@@ -552,7 +564,7 @@ export default {
   z-index: 100;
   max-height: 50%;
   overflow-y: auto;
-  margin-bottom: 70px;
+  margin-bottom: 78px;
   width: 50%;
 }
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.music_server.mapper.SongMapper">
+
+    <select id="getSongsBySingerId" resultMap="SongResultMap">
+        SELECT * FROM songs WHERE singer_id = #{singerId}
+    </select>
+    <resultMap id="SongResultMap" type="com.example.music_server.entity.Song">
+        <id property="id" column="id"/>
+        <result property="singerId" column="singer_id"/>
+        <result property="singerName" column="singer_name"/>
+        <result property="songName" column="song_name"/>
+        <result property="albumName" column="album_name"/>
+        <result property="lyrics" column="lyrics"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="mp3Url" column="mp3_url"/>
+    </resultMap>
+
+    <insert id="addSong">
+        INSERT INTO songs (singer_id, singer_name, song_name, album_name, lyrics, pic_url)
+        VALUES (#{singerId}, #{singerName}, #{songName}, #{albumName}, #{lyrics}, #{picUrl})
+    </insert>
+
+    <delete id="deleteSong">
+        DELETE FROM songs WHERE id = #{id}
+    </delete>
+
+    <update id="updateSong">
+        UPDATE songs SET song_name = #{songName}, album_name = #{albumName}, lyrics = #{lyrics}, pic_url = #{picUrl}
+        WHERE id = #{id}
+    </update>
+
+    <select id="getSongById" resultMap="SongResultMap">
+        SELECT id AS id, singer_id AS singerId, singer_name AS singerName, song_name AS songName, album_name AS albumName, lyrics, pic_url AS picUrl, mp3_url AS mp3Url FROM songs WHERE id = #{songId}
+    </select>
+
+    <update id="updateSongPic">
+        UPDATE songs SET pic_url = #{picUrl} WHERE id = #{id}
+    </update>
+
+    <update id="updateSongMp3">
+        UPDATE songs SET mp3_url = #{mp3Url} WHERE id = #{id}
+    </update>
+
+    <select id="searchSongs" resultMap="SongResultMap">
+        SELECT * FROM songs WHERE song_name LIKE #{keyword} OR singer_name LIKE #{keyword} OR album_name LIKE #{keyword}
+    </select>
+
+    <select id="getAllAlbums" resultMap="AlbumResultMap">
+        SELECT DISTINCT album_name,pic_url from songs
+    </select>
+    <resultMap id="AlbumResultMap" type="com.example.music_server.entity.Song">
+        <result property="albumName" column="album_name"/>
+        <result property="picUrl" column="pic_url"/>
+    </resultMap>
+
+    <select id="getSongsByAlbum" resultMap="SongResultMap">
+        SELECT * FROM songs WHERE album_name = #{albumName}
+    </select>
+
+    <!-- 批量查询歌曲信息 -->
+    <select id="getSongsByIds" resultType="com.example.music_server.entity.Song">
+        SELECT * FROM songs WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

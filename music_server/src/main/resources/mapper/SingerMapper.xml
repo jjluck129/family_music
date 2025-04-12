@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.music_server.mapper.SingerMapper">
+
+    <select id="getAllSingers" resultMap="SingerResultMap">
+        SELECT * FROM singer
+    </select>
+    <resultMap id="SingerResultMap" type="com.example.music_server.entity.Singer">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="imgUrl" column="imgUrl"/>
+        <result property="birth" column="birth"/>
+        <result property="location" column="location"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="getSingerById" resultMap="SingerResultMap">
+        SELECT * FROM singer WHERE id = #{id}
+    </select>
+
+    <insert id="insertSinger" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO singer(name, gender, imgUrl, birth, location, description)
+        VALUES(#{name}, #{gender}, #{imgUrl}, #{birth}, #{location}, #{description})
+    </insert>
+
+    <update id="updateSinger">
+        UPDATE singer SET name=#{name}, gender=#{gender}, imgurl=#{imgUrl},
+        birth=#{birth}, location=#{location}, description=#{description} WHERE id=#{id}
+    </update>
+
+    <update id="updateSingerImg">
+        UPDATE singer SET imgurl=#{imgUrl} WHERE id=#{id}
+    </update>
+
+    <delete id="deleteSingerById">
+        DELETE FROM singer WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultMap="SingerResultMap">
+        SELECT * FROM singer WHERE id = #{id}
+    </select>
+
+    <delete id="deleteSingersByIds">
+        DELETE FROM singer WHERE id IN (#{ids})
+    </delete>
+
+</mapper>

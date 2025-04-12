@@ -3,6 +3,7 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
+    userInfo: JSON.parse(localStorage.getItem("family-user")) || {},
     currentSong: null,  // 当前播放的歌曲
     playlist: [],    // 播放列表
     isPlaying: false,   // 播放状态
@@ -11,6 +12,14 @@ export default createStore({
     // playMode: 'normal', //播放模式：'normal'（顺序播放）, 'random'（随机播放）, 'loop'（循环播放）
   },
   mutations: {
+    setUserInfo(state, userInfo) {
+      state.userInfo = userInfo;
+      localStorage.setItem('family-user', JSON.stringify(userInfo)); // 将用户信息存储到 localStorage
+    },
+    clearUserInfo(state) {
+      state.userInfo = null;
+      localStorage.removeItem('family-user'); // 清除 localStorage 中的用户信息
+    },
     // 设置歌曲
     setCurrentSong(state, song) {
       state.currentSong = song;
@@ -92,6 +101,12 @@ export default createStore({
     },
   },
   actions: {
+    login({ commit }, userInfo) {
+      commit('setUserInfo', userInfo); // 登录时更新 userInfo
+    },
+    logout({ commit }) {
+      commit('clearUserInfo'); // 退出时清空 userInfo
+    },
     playSong({ commit,state }, song) {
       commit('setCurrentSong', song); // 设置当前播放的歌曲
       if (state.playMode === 'random') {
@@ -177,7 +192,6 @@ export default createStore({
     },
     restoreOrderPlaylist({ commit, state }) {
       // 恢复播放列表为顺序
-      // 假设 initialPlaylist 是初始顺序的播放列表
       commit('setPlaylist', state.initialPlaylist || [...state.playlist]);
     },
     removeSong({ commit }, songId) {
@@ -188,5 +202,6 @@ export default createStore({
     currentSong: (state) => state.currentSong,
     isPlaying: (state) => state.isPlaying,
     playlist: (state) => state.playlist,
+
   },
 });

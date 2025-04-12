@@ -31,6 +31,7 @@
             </span>
             <div v-if="isDropdownVisible" class="dropdown-menu">
               <span class="dropdown-item"><router-link to="/homepage/userprofile" class="auth-mes">个人信息</router-link></span>
+              <span class="dropdown-item"><router-link to="/homepage/likemusic" class="auth-mes">喜欢</router-link></span>
               <button @click="logout" class="dropdown-item">退出</button>
             </div>
           </div>
@@ -54,7 +55,7 @@
               </router-link>
             </li>
             <li :class="{ active: activeMenu === 'library' }" @click="setActive('library')">
-              <router-link to="#">
+              <router-link to="/homepage/likemusic">
                 <i class="fas fa-headphones-alt"></i>
                 <span v-if="isSidebarOpen">我的音乐</span>
               </router-link>
@@ -76,7 +77,7 @@
               <router-link to="/homepage/singerlist"><i class="fas fa-user" style="color: cornflowerblue;"></i> <span v-if="isSidebarOpen">歌手</span></router-link>
             </li>
             <li :class="{ active: activeMenu === 'album' }" @click="setActive('album')">
-              <router-link to="#"><i class="fa-solid fa-record-vinyl" style="color: darkorchid;"></i> <span v-if="isSidebarOpen">专辑</span></router-link>
+              <router-link to="/homepage/albumlist"><i class="fa-solid fa-record-vinyl" style="color: darkorchid;"></i> <span v-if="isSidebarOpen">专辑</span></router-link>
             </li>
             <li :class="{ active: activeMenu === 'playlist' }" @click="setActive('playlist')">
               <router-link to="#"><i class="fas fa-list" style="color:darkgreen ;"></i> <span v-if="isSidebarOpen">歌单</span></router-link>
@@ -87,8 +88,11 @@
             <li :class="{ active: activeMenu === 'radio' }" @click="setActive('radio')">
               <router-link to="#"><i class="fas fa-broadcast-tower" style="color: burlywood;"></i> <span v-if="isSidebarOpen">电台</span></router-link>
             </li>
-            <li :class="{ active: activeMenu === 'movie' }" @click="setActive('movie')">
+            <li :class="{ active: activeMenu === 'chat' }" @click="setActive('chat')">
               <router-link to="/homepage/chatpage"><i class="fa-regular fa-comment" style="color: blueviolet;"></i> <span v-if="isSidebarOpen">会话</span></router-link>
+            </li>
+            <li :class="{ active: activeMenu === 'develop' }" @click="setActive('develop');getToManage()">
+              <i class="fa-solid fa-screwdriver-wrench"></i> <span v-if="isSidebarOpen">开发者工具</span>
             </li>
           </ul>
         </div>
@@ -130,17 +134,27 @@ import PlayList from './Front/PlayList.vue';
 export default {
   data() {
     return {
-      user:{},
+      // user:{},
       activeMenu: 'discover', // 默认选中“发现音乐”
       isSidebarOpen: false,    // 侧边栏初始状态为打开
       isDropdownVisible:false,
       searchQuery:'',
     };
   },
+  computed: {
+    // 获取用户信息
+    user() {
+      return this.$store.state.userInfo || {}; // 从 Vuex 获取用户信息
+    },
+  },
   mounted() {
-    const savedUser = JSON.parse(localStorage.getItem("family-user") || "{}");
-    if (savedUser && savedUser.username) {
-      this.user = savedUser; // 同步到组件的 user 数据
+    // const savedUser = JSON.parse(localStorage.getItem("family-user") || "{}");
+    // if (savedUser && savedUser.username) {
+    //   this.user = savedUser; // 同步到组件的 user 数据
+    // }
+    // 初始化时检查用户是否登录
+    if (this.user) {
+      this.isDropdownVisible = true;
     }
     // 监听点击事件
     document.addEventListener('click', this.handleClickOutside);
@@ -171,6 +185,17 @@ export default {
     setActive(menuItem) {
       this.activeMenu = menuItem; // 设置为当前点击的菜单项
     },
+    getToManage(){
+      console.log(this.user.role)
+      if(this.user.role === "admin"){
+        if(this.user){
+          this.$router.push("/dashboard")
+        }
+      }else{
+        this.$message.error("请联系管理员进入！ ")
+      }
+
+    },
     toggleSidebar() {
       console.log('这是切换按钮');
       console.log(this.user);
@@ -187,11 +212,20 @@ export default {
         this.$message.warning("请输入搜索内容！");
       }
     },
-    logout(){
-      localStorage.removeItem("family-user");
-      this.user = {};
-      this.isDropdownVisible = false;
-      this.$router.push("/homepage/discovermusic")
+    // logout(){
+    //   localStorage.removeItem("family-user");
+    //   this.user = {};
+    //   this.isDropdownVisible = false;
+    //   this.$router.push("/homepage/discovermusic")
+    // },
+    logout() {
+      const username = this.user.username
+      this.$request.put(`/users/updateStatus/${username}`)
+          .then(res=>{
+            if(res.code === "200")
+            this.$store.dispatch('logout'); // 调用 Vuex 的 logout action
+          })
+      this.$router.push("/homepage/discovermusic"); // 退出后跳转到主页
     },
   },
   components:{

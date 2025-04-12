@@ -13,59 +13,48 @@
     </div>
     <div v-if="singer" class="singer-info">
       <div class="singer-avatar">
-        <img :src="singer?.imgUrl" alt="歌手头像" />
+        <img :src="singer.imgUrl" alt="歌手头像" />
       </div>
       <div class="singer-details">
-        <p><strong>姓名:</strong> {{ singer?.name }}</p>
-        <p><strong>性别:</strong> {{ singer?.gender }}</p>
-        <p><strong>地区:</strong> {{ singer?.location }}</p>
-        <p><strong>生日:</strong> {{ new Date(singer?.birth).getMonth() + 1 }}月{{ new Date(singer?.birth).getDate() }}日</p>
-        <p><strong>简介:</strong> {{ singer?.description }}</p>
+        <p><strong>姓名:</strong> {{ singer.name }}</p>
+        <p><strong>性别:</strong> {{ singer.gender }}</p>
+        <p><strong>地区:</strong> {{ singer.location }}</p>
+        <p>
+          <strong>生日:</strong>
+          {{ new Date(singer.birth).getMonth() + 1 }}月{{ new Date(singer.birth).getDate() }}日
+        </p>
+        <p><strong>简介:</strong> {{ singer.description }}</p>
       </div>
     </div>
 
     <div v-if="singer" class="songs">
       <h3>代表歌曲</h3>
       <ul>
-        <li
-          v-for="song in songs"
-          :key="song.id"
-          class="song-item-container"
-          @mouseenter="hoveredSongId = song.id"
-          @mouseleave="hoveredSongId = null" 
-        >
+        <li v-for="song in songs" :key="song.id" class="song-item-container">
           <div class="song-item">
-            <span class="song-name">{{ song?.songName }}</span>
-
-            <!-- 悬浮显示的操作按钮 -->
-            <div v-if="hoveredSongId === song.id" class="song-icons">
+            <span class="song-name">{{ song.songName }}</span>
+            <div class="song-icons">
               <i class="fa fa-play-circle icon-btn" @click="playSong(song)"></i>
-
-              <!-- 添加按钮，使用 el-dropdown -->
-              <el-dropdown  @command="handleAddCommand(song)" placement="bottom">
+              <el-dropdown trigger="click" @command="(cmd) => handleAddCommand(song, cmd)" placement="bottom">
                 <i class="fa fa-plus-circle icon-btn"></i>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="playlist" :data-song="song">添加到歌曲列表</el-dropdown-item>
-                    <el-dropdown-item command="favorites" :data-song="song">添加到收藏</el-dropdown-item>
+                    <el-dropdown-item command="playlist">添加到歌曲列表</el-dropdown-item>
+                    <el-dropdown-item command="favorites">添加到收藏</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
-                
               </el-dropdown>
-
-              <!-- 分享按钮，使用 el-dropdown -->
-              <el-dropdown trigger="click" @command="handleShareCommand" placement="bottom-end">
+              <el-dropdown trigger="click" @command="(cmd) => handleShareCommand(song, cmd)" placement="bottom-end">
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="share1" :data-song="song">分享选项 1</el-dropdown-item>
-                    <el-dropdown-item command="share2" :data-song="song">分享选项 2</el-dropdown-item>
+                    <el-dropdown-item command="share1">分享选项 1</el-dropdown-item>
+                    <el-dropdown-item command="share2">分享选项 2</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
                 <i class="fa fa-share-alt icon-btn"></i>
               </el-dropdown>
             </div>
-
-            <span class="song-album">{{ song?.albumName }}</span>
+            <span class="song-album">{{ song.albumName }}</span>
           </div>
         </li>
       </ul>
@@ -74,15 +63,12 @@
 </template>
 
 <script>
-// import axios from 'axios';
-
 export default {
   name: 'SingerDetail',
   data() {
     return {
       singer: null,
       songs: [],
-      hoveredSongId: null,
     };
   },
   mounted() {
@@ -91,8 +77,7 @@ export default {
   },
   methods: {
     loadSingerDetail(id) {
-      this.$request.get(`/singers/${id}`).then(response => {
-        console.log("返回的数据"+response.data)
+      this.$request.get(`/singers/${id}`).then((response) => {
         this.singer = response.data;
       });
       this.$request.get(`/songs/list/${id}`).then((response) => {
@@ -100,20 +85,18 @@ export default {
       });
     },
     playSong(song) {
-      console.log('播放歌曲:', song);
       this.$store.dispatch('playSong', song);
     },
-    handleAddCommand(command, event) {
-      const song = event.target.dataset.song;
+    // 直接传入 song 对象和命令参数
+    handleAddCommand(song, command) {
       if (command === 'playlist') {
         this.addToPlaylist(song);
       } else if (command === 'favorites') {
         this.addToFavorites(song);
       }
     },
-    handleShareCommand(command, event) {
-      const song = event.target.dataset.song;
-      console.log(`分享歌曲 ${song}，选项：${command}`);
+    handleShareCommand(song, command) {
+      console.log(`分享歌曲 ${song.songName}，选项：${command}`);
     },
     addToPlaylist(song) {
       this.$store.commit('addToPlaylist', song);
@@ -121,6 +104,26 @@ export default {
     },
     addToFavorites(song) {
       console.log('添加到收藏:', song);
+      const userId = JSON.parse(localStorage.getItem("family-user") || "").id;
+      this.$request
+        .get(`/songlike/check`, { params: { userId: userId, songId: song.id } })
+        .then(response => {
+            if (response.code === "200") {
+              this.$message.info("你已添加至喜欢");
+            } else {
+            const likeData = { songId: song.id, userId: userId };
+            this.$request
+                .post("/songlike/add", likeData)
+                .then(res => {
+                    console.log(res)
+                if (res.code === "200") {
+                    this.$message.success("添加喜欢成功");
+                } else {
+                    this.$message.error(res.data.msg || "添加喜欢失败");
+                }
+                });
+            }
+        })
     },
   },
 };
@@ -166,39 +169,44 @@ export default {
   padding: 0;
 }
 
-/* 包裹歌曲行和按钮的容器 */
+/* 歌曲项容器 */
 .song-item-container {
   padding: 10px 0;
-  display: flex;
-  align-items: center;
   position: relative;
 }
 
+/* 歌曲项内容 */
 .song-item {
   display: flex;
-  width: 100%;
   align-items: center;
 }
 
-/* 歌名左对齐 */
+/* 歌名 */
 .song-name {
   flex: 1;
   text-align: left;
 }
 
-/* 专辑名样式，左对齐 */
+/* 专辑名 */
 .song-album {
-  text-align: left;
   flex: 1;
   padding-left: 10px;
+  text-align: left;
 }
 
-/* 悬停出现的图标按钮 */
+/* 操作按钮区域：始终存在，只是默认透明 */
 .song-icons {
   display: flex;
   gap: 10px;
   position: absolute;
   right: 100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* 鼠标悬停整个歌曲项时显示操作按钮 */
+.song-item-container:hover .song-icons {
+  opacity: 1;
 }
 
 .icon-btn {

@@ -8,6 +8,7 @@ public interface UserService {
     List<User> getAlluser();
     int count(String searchWord);
     void addUser(User user);
+    boolean register(User user);
     void updateUser(User user);
     void updateAvatar(Integer id, String avatar);
     void deleteUser(Integer id);
@@ -17,5 +18,5 @@ public interface UserService {
     // 用户登录验证
     User login(User user);
     User findByUsername(String username);
-
+    int updateStatusByUsername(String username);
 }

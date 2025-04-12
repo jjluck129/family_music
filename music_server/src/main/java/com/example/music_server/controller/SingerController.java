@@ -3,6 +3,7 @@ package com.example.music_server.controller;
 
 import com.example.music_server.common.Result;
 import com.example.music_server.entity.Singer;
+import com.example.music_server.entity.Song;
 import com.example.music_server.service.SingerService;
 import org.apache.ibatis.annotations.Insert;
 import org.springframework.beans.factory.annotation.Autowired;

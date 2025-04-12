@@ -1,0 +1,15 @@
+# Redis
+spring:
+    redis:
+        host: localhost      # Redis ��������ַ
+        port: 6379           # Redis �˿�
+        password:            # Redis ���루���û�о����գ�
+        database: 0          # ѡ�����ݿ⣨Ĭ���� 0��
+        lettuce:
+            pool:
+                max-active: 8    # ���ӳ����������
+                max-idle: 8      # ����������
+                min-idle: 0      # ��С��������
+                max-wait: 100ms  # �������ȴ�ʱ��
+
+
